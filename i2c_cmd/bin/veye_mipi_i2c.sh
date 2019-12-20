@@ -18,7 +18,7 @@ print_usage()
 	echo "    -p1 [param1] 			   param1 of each function"
 	echo "    -p2 [param1] 			   param2 of each function"
 	echo "    -b [i2c bus num] 		   i2c bus number"
-	echo "support functions: devid,hdver,wdrmode,videoformat,mirrormode,denoise,agc,lowlight,daynightmode,ircutdir,irtrigger"
+	echo "support functions: devid,hdver,wdrmode,videoformat,mirrormode,denoise,agc,lowlight,daynightmode,ircutdir,irtrigger¡ê?mshutter"
 }
 ######################parse arg###################################
 MODE=read;
@@ -149,10 +149,10 @@ write_videoformat()
 	local res=0;
 	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x10 0xDE );
 	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x11 0xC2 );
-	if [ $PARAM1 == "PAL" ] ; then
+	if [ $PARAM1 = "PAL" ] ; then
 		res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x12 0x0);
 	fi
-	if [ $PARAM1 == "NTSC" ] ; then
+	if [ $PARAM1 = "NTSC" ] ; then
 		res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x12 0x1);
 	fi
 	
@@ -248,6 +248,28 @@ write_lowlight()
 	printf "w lowlight is 0x%2x\n" $PARAM1;
 }
 
+read_mshutter()
+{
+	local mshutter=0;
+	local res=0;
+	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x10 0xDA );
+	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x11 0x66 );
+	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x13 0x01 );
+	res=$(./i2c_read $I2C_DEV $I2C_ADDR  0x14 );
+	mshutter=$?;
+	printf "r mshutter is 0x%2x\n" $mshutter;
+}
+write_mshutter()
+{
+	local mshutter=0;
+	local res=0;
+	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x10 0xDA );
+	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x11 0x66 );
+	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x12 $PARAM1);
+	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x13 0x00 );
+	printf "w mshutter is 0x%2x\n" $PARAM1;
+}
+
 read_daynightmode()
 {
 	local daynightmode=0;
@@ -305,7 +327,7 @@ fi
 
 ./i2c_write $I2C_DEV $I2C_ADDR  0x07 0xFE&> /dev/null;
 
-if [ ${MODE} == "read" ] ; then	
+if [ ${MODE} = "read" ] ; then
 	case $FUNCTION in
 		"devid"|"deviceid")
 			read_devid;
@@ -340,12 +362,15 @@ if [ ${MODE} == "read" ] ; then
 		"irtrigger")
 			read_irtrigger;
 			;;
+		"mshutter")
+			read_mshutter;
+			;;
 	esac
 fi
 
 
 
-if [ ${MODE} == "write" ] ; then 	
+if [ ${MODE} = "write" ] ; then
 	case $FUNCTION in
 		"devid"|"deviceid")
 			echo "NOT SUPPORTED!";
@@ -379,6 +404,9 @@ if [ ${MODE} == "write" ] ; then
 			;;
 		"irtrigger")
 			write_irtrigger;
+			;;
+		"mshutter")
+			write_mshutter;
 			;;
 	esac
 fi
