@@ -110,7 +110,6 @@ read_wdrmode()
 	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x10 0xDB );
 	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x11 0x32 );
 	res=$(./i2c_write $I2C_DEV $I2C_ADDR  0x13 0x01 );
-    sleep 0.1;
 	res=$(./i2c_read $I2C_DEV $I2C_ADDR  0x14 );
 	wdrmode=$?;
 	printf "r wdrmode is 0x%2x\n" $wdrmode;
